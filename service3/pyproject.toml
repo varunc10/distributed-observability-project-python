@@ -1,0 +1,28 @@
+[project]
+name = "service3"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi (>=0.135.1,<0.136.0)",
+    "uvicorn (>=0.42.0,<0.43.0)",
+    "sqlalchemy (>=2.0.48,<3.0.0)",
+    "psycopg2-binary (>=2.9.11,<3.0.0)",
+    "motor (>=3.7.1,<4.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "opentelemetry-distro (>=0.61b0,<0.62)",
+    "opentelemetry-exporter-otlp (>=1.40.0,<2.0.0)",
+    "opentelemetry-instrumentation-fastapi (>=0.61b0,<0.62)",
+    "python-dotenv (>=1.2.2,<2.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "service3", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
