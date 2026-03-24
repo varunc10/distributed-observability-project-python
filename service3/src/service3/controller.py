@@ -3,6 +3,7 @@ from schema import OrderRequest
 from db_postgres import SessionLocal
 from models import Order, User
 import uvicorn
+import logging
 
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
@@ -13,6 +14,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.propagate import set_global_textmap
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from observability import setup_logging
 
 set_global_textmap(TraceContextTextMapPropagator())
 
@@ -36,16 +38,26 @@ provider.add_span_processor(span_processor)
 app = FastAPI()
 FastAPIInstrumentor.instrument_app(app)
 
+logger = logging.getLogger(__name__)
+
 @app.post("/api/v1/tracing/service3")
 async def create_order(request: OrderRequest, raw_request: Request):
-    print(f"Incoming Headers: {raw_request.headers}")
+    logger.info("Received request", extra={
+            "headers": dict(raw_request.headers),
+            "path": raw_request.url.path,
+            "method": raw_request.method,
+        }
+    )
     session = SessionLocal()
 
     try:
+        logger.info("Fetching user", extra={"user_id": request.userId})
         user = session.query(User).filter(User.id == request.userId).first()
         if not user:
+            logger.warning("No user", extra={"user_id": request.userId})
             raise HTTPException(status_code=404, detail="User not found")
 
+        logger.info("Creating order", extra={"order_number": request.orderNumber})
         order = Order(
             order_number=request.orderNumber,
             user=user,
@@ -54,12 +66,28 @@ async def create_order(request: OrderRequest, raw_request: Request):
         session.commit()
         session.refresh(order)
 
+        logger.info(
+            "Order created successfully",
+            extra={
+                "order_id": order.id,
+                "user_id": request.userId
+            }
+        )
+
         return {"message": "order created"}
     except Exception as e:
         session.rollback()
+        logger.error(
+            "Order creation failed",
+            extra={
+                "error": str(e),
+                "user_id": request.userId,
+            }
+        )
         raise e
     finally:
         session.close()
 
 if __name__ == "__main__":
+    setup_logging()
     uvicorn.run(app, host="0.0.0.0", port=8003)

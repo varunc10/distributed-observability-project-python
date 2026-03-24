@@ -7,7 +7,7 @@ load_dotenv()
 
 username = os.getenv("POSTGRES_USER")
 password = os.getenv("POSTGRES_PASSWORD")
-DATABASE_URL = f"postgresql://${username}:${password}@localhost:5432/tracing_python"
+DATABASE_URL = f"postgresql://{username}:{password}@localhost:5432/tracing_python"
 
 engine = create_engine(DATABASE_URL)
 

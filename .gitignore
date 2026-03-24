@@ -33,3 +33,6 @@ build/
 .vscode/
 .env
 poetry.lock
+
+**/logs/
+*.log
