@@ -134,3 +134,8 @@ volumes:
   postgres-data:
   es-data:
 
+networks:
+  default:
+    external: true
+    name: observability
+

@@ -22,7 +22,7 @@ class TraceContextFilter(logging.Filter):
         else:
             record.trace_id = None
             record.span_id = None
-        record.service = "service4"
+        record.service_name = "service4"
 
         return True
 

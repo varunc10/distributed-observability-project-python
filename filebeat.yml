@@ -11,5 +11,9 @@ output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
   index: "app-logs-%{+yyyy.MM.dd}"
 
+setup.template.name: "app-logs"
+setup.template.pattern: "app-logs-*"
+setup.template.enabled: true
+
 setup.kibana:
   host: "kibana:5601"
