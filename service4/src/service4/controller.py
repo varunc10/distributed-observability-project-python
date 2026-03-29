@@ -2,8 +2,8 @@ import logging
 import time
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
-from prometheus_client import Counter, Histogram, generate_latest
+from fastapi import FastAPI, HTTPException, Request, Response
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 from db_mongo import orders_collection
 from schema import OrderRequest
@@ -79,7 +79,10 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/metrics")
 def metrics():
-    return generate_latest()
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
 
 @app.post("/api/v1/tracing/service4")
 async def create_order(request: OrderRequest, raw_request: Request):

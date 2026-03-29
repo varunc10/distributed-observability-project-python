@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from schema import OrderRequest
-from prometheus_client import Counter, Histogram, Gauge, generate_latest
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from db_postgres import SessionLocal
 from models import Order, User
 import uvicorn
@@ -77,7 +77,10 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/metrics")
 def metrics():
-    return generate_latest()
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
 
 @app.post("/api/v1/tracing/service3")
 async def create_order(request: OrderRequest, raw_request: Request):
