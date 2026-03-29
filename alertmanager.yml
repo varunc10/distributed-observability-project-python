@@ -1,0 +1,15 @@
+route:
+  receiver: "default"
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1m
+
+receivers:
+  - name: "default"
+#    email_configs:
+#      - to: "your-email@gmail.com"
+#        from: "alertmanager@gmail.com"
+#        smarthost: "smtp.gmail.com:587"
+#        auth_username: "your-email@gmail.com"
+#        auth_password: "app-password"

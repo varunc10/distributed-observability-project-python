@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 5s
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: "spring-services"
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["localhost:8001"]
+        labels:
+          service: service1
+          env: local
+      - targets: ["localhost:8002"]
+        labels:
+          service: service2
+          env: local
+  - job_name: "python-services"
+    static_configs:
+      - targets: ["localhost:8003"]
+        labels:
+          service: service3
+          env: local
+      - targets: ["localhost:8004"]
+        labels:
+          service: service4
+          env: local

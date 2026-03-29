@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request
 from schema import OrderRequest
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from db_postgres import SessionLocal
 from models import Order, User
 import uvicorn
 import logging
+import time
 
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
@@ -39,6 +41,43 @@ app = FastAPI()
 FastAPIInstrumentor.instrument_app(app)
 
 logger = logging.getLogger(__name__)
+
+REQUEST_COUNT = Counter(
+    "http_requests_total", "Total HTTP requests", ["service", "method", "endpoint"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds", "Request latency", ["service", "endpoint"]
+)
+
+ERROR_COUNT = Counter(
+    "http_errors_total","Total errors",["service", "endpoint"]
+)
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    start_time = time.time()
+
+    try:
+        return await call_next(request)
+    except Exception as e:
+        ERROR_COUNT.labels("service3", request.scope.get("route").path).inc()
+        logger.error(e)
+        raise e
+    finally:
+        latency = time.time() - start_time
+
+        REQUEST_COUNT.labels(
+            service="service3", method=request.method, endpoint=request.scope.get("route").path
+        ).inc()
+
+        REQUEST_LATENCY.labels(
+            service="service3", endpoint=request.scope.get("route").path
+        ).observe(latency)
+
+@app.get("/metrics")
+def metrics():
+    return generate_latest()
 
 @app.post("/api/v1/tracing/service3")
 async def create_order(request: OrderRequest, raw_request: Request):

@@ -1,43 +1,43 @@
 version: "3.8"
 
 services:
-#  kafka:
-#    image: confluentinc/cp-kafka:7.6.0
-#    container_name: kafka_1
-#    ports:
-#      - "9092:9092"
-#    volumes:
-#      - kafka-data-1:/var/lib/kafka/data
-#    environment:
-#      CLUSTER_ID: ${CLUSTER_ID}
-#      KAFKA_NODE_ID: 1
-#      KAFKA_PROCESS_ROLES: broker,controller
-#      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-#
-#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-#      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-#
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-#      KAFKA_NUM_PARTITIONS: 3
-#      KAFKA_LOG_DIRS: /var/lib/kafka/data
-#      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-#
-#  rabbitmq:
-#    image: rabbitmq:3-management
-#    ports:
-#      - "5672:5672"     # AMQP
-#      - "15672:15672"   # UI
-#    environment:
-#      RABBITMQ_DEFAULT_USER: ${POSTGRES_USER}
-#      RABBITMQ_DEFAULT_PASS: ${POSTGRES_PASS}
-#    volumes:
-#      - rabbitmq-data:/var/lib/rabbitmq
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka_1
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data-1:/var/lib/kafka/data
+    environment:
+      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${POSTGRES_USER}
+      RABBITMQ_DEFAULT_PASS: ${POSTGRES_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 
   mongo:
     image: mongo:latest
@@ -84,29 +84,29 @@ services:
 #    depends_on:
 #      - jaeger
 
-#  filebeat:
-#    image: docker.elastic.co/beats/filebeat:8.11.0
-#    container_name: filebeat
-#    user: root
-#    volumes:
-#      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-#      # Mount the root of your repo so Filebeat can access all sub-service logs
-#      - ./:/usr/share/filebeat/app:ro
-#    depends_on:
-#      - elasticsearch
-#
-#  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-#    container_name: elasticsearch
-#    ports:
-#      - "9200:9200"
-#    environment:
-#      discovery.type: single-node
-#      xpack.security.enabled: false
-#      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-#    volumes:
-#      - es-data:/usr/share/elasticsearch/data
-#
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.0
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      # Mount the root of your repo so Filebeat can access all sub-service logs
+      - ./:/usr/share/filebeat/app:ro
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+
 #  logstash:
 #    image: docker.elastic.co/logstash/logstash:8.11.0
 #    container_name: logstash
@@ -116,16 +116,46 @@ services:
 #      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
 #    depends_on:
 #      - elasticsearch
-#
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:8.11.0
-#    container_name: kibana
-#    ports:
-#      - "5601:5601"
-#    environment:
-#      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-#    depends_on:
-#      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
 
 volumes:
   kafka-data-1:
@@ -133,6 +163,7 @@ volumes:
   mongo-data:
   postgres-data:
   es-data:
+  prometheus_data:
 
 networks:
   default:

@@ -1,0 +1,10 @@
+groups:
+  - name: test-alerts
+    rules:
+      - alert: AlwaysFiring
+        expr: vector(1)
+        for: 10s
+        labels:
+          severity: test
+        annotations:
+          summary: "This is a test alert"
